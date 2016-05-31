@@ -175,9 +175,9 @@ class PrestaShopWebService(object):
         if self.http_client is None:
             self.http_client = httplib2.Http(**self.client_args)
             # Prestashop use the key as username without password
-            self.http_client.add_credentials(self._api_key, False)
-            if hasattr(self.http_client, "set_auth_type"):
-                self.http_client.set_auth_type("basic")
+            # self.http_client.add_credentials(self._api_key, False)
+            # if hasattr(self.http_client, "set_auth_type"):
+            #     self.http_client.set_auth_type("basic")
             self.http_client.follow_all_redirects = True
 
         if self.debug:
@@ -225,7 +225,7 @@ class PrestaShopWebService(object):
         """
         if not isinstance(options, dict):
             raise PrestaShopWebServiceError('Parameters must be a instance of dict')
-        supported = ('filter', 'display', 'sort', 'limit', 'schema', 'date', 'id_shop')
+        supported = ('filter', 'display', 'sort', 'limit', 'schema', 'date', 'id_shop', 'ws_key')
         # filter[firstname] (as e.g.) is allowed, so check only the part before a [
         unsupported = set([param.split('[')[0] for param in options]).difference(supported)
         if unsupported:
@@ -250,6 +250,8 @@ class PrestaShopWebService(object):
         """
         if self.debug:
             options.update({'debug': True})
+        if not 'ws_key' in options:
+            options.update({'ws_key': self._api_key})
         return urllib.urlencode(options)
 
     def add(self, resource, content=None, files=None):
@@ -310,6 +312,8 @@ class PrestaShopWebService(object):
         full_url = self._api_url + resource
         if resource_id is not None:
             full_url += "/%s" % (resource_id,)
+        if options is None:
+            options = {'ws_key': self._api_key}
         if options is not None:
             self._validate_query_options(options)
             full_url += "?%s" % (self._options_to_querystring(options),)
