@@ -136,8 +136,8 @@ class PrestaShopWebService(object):
         else:
             self.client = session
 
-        if not self.client.auth:
-            self.client.auth = (api_key, '')
+        # if not self.client.auth:
+        #     self.client.auth = (api_key, '')
 
     def _parse_error(self, xml_content):
         """Take the XML content as string and extract the PrestaShop error.
@@ -294,7 +294,7 @@ class PrestaShopWebService(object):
             )
         supported = (
             'filter', 'display', 'sort',
-            'limit', 'schema', 'date', 'id_shop'
+            'limit', 'schema', 'date', 'id_shop', 'ws_key'
         )
         # filter[firstname] (as e.g.) is allowed
         # so check only the part before a [
@@ -325,6 +325,8 @@ class PrestaShopWebService(object):
         """
         if self.debug:
             options.update({'debug': True})
+        if 'ws_key' not in options:
+            options.update({'ws_key': self._api_key})
         return urlencode(options)
 
     def add(self, resource, content=None, files=None):
@@ -339,7 +341,9 @@ class PrestaShopWebService(object):
             for data to be uploaded as files.
         :return: an ElementTree of the response from the web service
         """
-        return self.add_with_url(self._api_url + resource, content, files)
+        full_url = self._api_url + resource + \
+            "?%s" % (self._options_to_querystring({}))
+        return self.add_with_url(full_url, content, files)
 
     def add_with_url(self, url, xml=None, files=None):
         """Add (POST) a resource.
@@ -393,6 +397,8 @@ class PrestaShopWebService(object):
         full_url = self._api_url + resource
         if resource_id is not None:
             full_url += "/%s" % (resource_id,)
+        if options is None:
+            options = {'ws_key': self._api_key}
         if options is not None:
             self._validate_query_options(options)
             full_url += "?%s" % (self._options_to_querystring(options),)
@@ -418,6 +424,8 @@ class PrestaShopWebService(object):
         full_url = self._api_url + resource
         if resource_id is not None:
             full_url += "/%s" % (resource_id,)
+        if options is None:
+            options = {'ws_key': self._api_key}
         if options is not None:
             self._validate_query_options(options)
             full_url += "?%s" % (self._options_to_querystring(options),)
@@ -438,7 +446,8 @@ class PrestaShopWebService(object):
         :param content: modified XML as string of the resource.
         :return: an ElementTree of the Webservice's response
         """
-        full_url = "%s%s" % (self._api_url, resource)
+        querystring = self._options_to_querystring({'ws_key': self._api_key})
+        full_url = "%s%s?%s" % (self._api_url, resource, querystring)
         return self.edit_with_url(full_url, content)
 
     def edit_with_url(self, url, content):
@@ -461,11 +470,14 @@ class PrestaShopWebService(object):
             raise an error PrestaShopWebServiceError if missed
         """
         full_url = self._api_url + resource
+        querystring = self._options_to_querystring({'ws_key': self._api_key})
         if isinstance(resource_ids, (tuple, list)):
-            full_url += "/?id=[%s]" % (','.join([str(resource_id)
-                                       for resource_id in resource_ids]),)
+            full_url += "/?id=[%s]&%s" % (
+                ','.join([str(resource_id) for resource_id in resource_ids]),
+                querystring,
+            )
         else:
-            full_url += "/%s" % str(resource_ids)
+            full_url += "/%s?%s" % (str(resource_ids), querystring)
         return self.delete_with_url(full_url)
 
     def delete_with_url(self, url):
