@@ -294,7 +294,7 @@ class PrestaShopWebService(object):
             )
         supported = (
             'filter', 'display', 'sort',
-            'limit', 'schema', 'date', 'id_shop', 'ws_key'
+            'limit', 'schema', 'date', 'id_shop', 'ws_key', 'id_order'
         )
         # filter[firstname] (as e.g.) is allowed
         # so check only the part before a [
