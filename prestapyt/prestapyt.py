@@ -582,7 +582,7 @@ class PrestaShopWebServiceDict(PrestaShopWebService):
             Remove root keys ['prestashop'] from the message
         """
         response = super(PrestaShopWebServiceDict, self).get_with_url(url)
-        if isinstance(response, dict):
+        if isinstance(response, dict) and 'prestashop' in response:
             return response['prestashop']
         else:
             return response
