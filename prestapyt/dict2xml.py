@@ -13,6 +13,7 @@
 from __future__ import unicode_literals
 from xml.dom.minidom import getDOMImplementation
 from builtins import str
+from datetime import datetime, date, time
 
 # past.builtins generates deprecated warning (import imp)
 try:
@@ -37,6 +38,16 @@ def _process(doc, tag, tag_value):
         tag_value = ''
 
     # Create a new node for simple values
+    date_format_dict = {
+        datetime: '%Y-%m-%d %H:%M:%S',
+        date: '%Y-%m-%d',
+        time: '%H:%M:%S'
+    }
+
+    date_format_list = [fmt for dtype, fmt in date_format_dict.items() if isinstance(tag_value, dtype)]
+
+    if date_format_list:
+        tag_value = tag_value.strftime(' '.join(date_format_list))
     if (isinstance(tag_value, (float, int)) or
             isinstance(tag_value, basestring)):
         return _process_simple(doc, tag, tag_value)
