@@ -44,7 +44,7 @@ def _process(doc, tag, tag_value):
         time: '%H:%M:%S'
     }
 
-    date_format_list = [fmt for dtype, fmt in date_format_dict.items() if isinstance(tag_value, dtype)]
+    date_format_list = [fmt for dtype, fmt in date_format_dict.items() if type(tag_value) is dtype]
 
     if date_format_list:
         tag_value = tag_value.strftime(' '.join(date_format_list))
