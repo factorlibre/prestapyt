@@ -31,6 +31,7 @@ def _process(doc, tag, tag_value):
     @param tag_value: tag value
     @return: node or nodelist, be careful
     """
+    import pdb;pdb.set_trace()
     if isinstance(tag_value, dict) and 'value' in list(tag_value.keys()) == ['value']:
         tag_value = tag_value['value']
 
