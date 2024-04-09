@@ -31,7 +31,6 @@ def _process(doc, tag, tag_value):
     @param tag_value: tag value
     @return: node or nodelist, be careful
     """
-    import pdb;pdb.set_trace()
     if isinstance(tag_value, dict) and 'value' in list(tag_value.keys()) == ['value']:
         tag_value = tag_value['value']
 
@@ -49,6 +48,10 @@ def _process(doc, tag, tag_value):
 
     if date_format_list:
         tag_value = tag_value.strftime(' '.join(date_format_list))
+
+    if isinstance(tag_value, bool):
+        tag_value = 1 if tag_value else 0
+
     if (isinstance(tag_value, (float, int)) or
             isinstance(tag_value, basestring)):
         return _process_simple(doc, tag, tag_value)
