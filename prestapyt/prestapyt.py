@@ -489,6 +489,34 @@ class PrestaShopWebService(object):
         response = self._execute(url, "PUT", data=content, add_headers=headers)
         return self._parse(response.content)
 
+    def patch(self, resource, resource_id, content, options=None):
+        """Partial edit (PATCH) of a resource: only the sent fields change.
+
+        :param resource: type of resource to edit
+        :param resource_id: id of the resource to edit
+        :param content: XML as string with the fields to change
+        :param options: optional dict of parameters
+        :return: an ElementTree of the Webservice's response
+        """
+        full_url = "%s%s/%s" % (self._api_url, resource, resource_id)
+        if options:
+            self._validate_query_options(options)
+            full_url += "?%s" % (self._options_to_querystring(options),)
+        return self.patch_with_url(full_url, content)
+
+    def patch_with_url(self, url, content):
+        """Partial edit (PATCH) of a resource from a full URL.
+
+        Needs PrestaShop 8 or later.
+
+        :param url: full url of the resource to edit
+        :param content: XML as string with the fields to change
+        :return: an ElementTree of the Webservice's response
+        """
+        headers = {"Content-Type": "text/xml"}
+        response = self._execute(url, "PATCH", data=content, add_headers=headers)
+        return self._parse(response.content)
+
     def delete(self, resource, resource_ids):
         """Delete (DELETE) a resource.
 
@@ -679,6 +707,17 @@ class PrestaShopWebServiceDict(PrestaShopWebService):
         xml_content = dict2xml.dict2xml({"prestashop": content})
         _super = super(PrestaShopWebServiceDict, self)
         return _super.edit_with_url(url, xml_content)
+
+    def patch_with_url(self, url, content):
+        """Partial edit (PATCH) of a resource from a full URL.
+
+        :param url: full url of the resource to edit
+        :param content: dict with the fields to change, inside its resource node
+        :return: a dict of the response from the web service
+        """
+        xml_content = dict2xml.dict2xml({"prestashop": content})
+        _super = super(PrestaShopWebServiceDict, self)
+        return _super.patch_with_url(url, xml_content)
 
     def _parse(self, content):
         """Parse the response of the webservice, assumed to be a XML in utf-8.
